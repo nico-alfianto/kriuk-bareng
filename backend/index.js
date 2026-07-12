@@ -14,4 +14,5 @@ app.get('/api/produk', async (req, res) => {
   res.json(data);
 });
 
-app.listen(3000, () => console.log('Server jalan di port 3000'));
+// PENTING BUAT VERCEL
+module.exports = app;
