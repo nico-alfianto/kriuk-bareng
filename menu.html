@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Menu - Kriuk Bareng</title>
+<style>
+body{background:#0f0a09; color:#fff; font-family:Arial; margin:0; padding:20px}
+h1{color:#ffb300; text-align:center}
+.card{background:#1a120e; padding:15px; border-radius:12px; margin:15px 0}
+.btn{background:#25D366; color:#fff; padding:14px 20px; border:none; border-radius:8px; width:100%; font-size:16px; font-weight:bold; margin-top:20px}
+.qty{display:flex; justify-content:center; align-items:center; gap:15px; margin:10px 0}
+.qty button{padding:8px 18px; background:#c62828; color:#fff; border:none; border-radius:8px; font-size:18px}
+.total{position:fixed; bottom:0; left:0; right:0; background:#1a120e; padding:15px; border-top:2px solid #ffb300}
+</style>
+</head>
+<body>
+<h1>MENU KRIUK BARENG 🔥</h1>
+
+<div class="card">
+  <h3>Stik Basreng Original</h3>
+  <p>Rp 15.000</p>
+  <div class="qty">
+    <button onclick="kurang(0)">-</button><span id="q0">0</span><button onclick="tambah(0)">+</button>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Stik Basreng Pedas</h3>
+  <p>Rp 17.000</p>
+  <div class="qty">
+    <button onclick="kurang(1)">-</button><span id="q1">0</span><button onclick="tambah(1)">+</button>
+  </div>
+</div>
+
+<div class="total">
+  <p>Total: Rp <span id="total">0</span></p>
+  <button class="btn" onclick="pesanWA()">Pesan via WhatsApp</button>
+</div>
+
+<script>
+let produk = [
+  {nama:"Stik Basreng Original", harga:15000, qty:0},
+  {nama:"Stik Basreng Pedas", harga:17000, qty:0}
+];
+
+function tambah(i){
+  produk[i].qty++;
+  document.getElementById('q'+i).innerText = produk[i].qty;
+  hitungTotal();
+}
+function kurang(i){
+  if(produk[i].qty > 0) produk[i].qty--;
+  document.getElementById('q'+i).innerText = produk[i].qty;
+  hitungTotal();
+}
+function hitungTotal(){
+  let total = produk.reduce((a,b)=>a + b.harga*b.qty, 0);
+  document.getElementById('total').innerText = total.toLocaleString('id-ID');
+}
+function pesanWA(){
+  let pesan = "Halo Kriuk Bareng, saya mau pesan:%0A";
+  produk.forEach(p=>{
+    if(p.qty > 0) pesan += `- ${p.nama} x${p.qty}%0A`;
+  });
+  pesan += "Total: Rp " + document.getElementById('total').innerText;
+  window.open("https://wa.me/62895355220452?text=" + pesan);
+}
+</script>
+</body>
+</html>
