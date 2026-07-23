@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Pesanan - Kriuk Bareng</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+
+<body class="bg-gray-100">
+
+<div class="flex">
+
+  <!-- Sidebar -->
+  <aside class="admin-sidebar w-64">
+
+    <div class="p-6">
+
+      <h2 class="text-2xl font-bold">
+        Kriuk Bareng
+      </h2>
+
+      <p class="text-gray-400 text-sm">
+        Admin Panel
+      </p>
+
+    </div>
+
+    <nav>
+
+      <a href="index.html">
+        📊 Dashboard
+      </a>
+
+      <a href="produk.html">
+        📦 Produk
+      </a>
+
+      <a href="pesanan.html">
+        🛒 Pesanan
+      </a>
+
+      <a href="../index.html">
+        🌐 Website
+      </a>
+
+    </nav>
+
+  </aside>
+
+  <!-- Content -->
+  <main class="flex-1 p-6">
+
+    <div class="flex justify-between items-center mb-6">
+
+      <div>
+
+        <h1 class="text-3xl font-bold">
+          Manajemen Pesanan
+        </h1>
+
+        <p class="text-gray-500">
+          Kelola seluruh transaksi pelanggan
+        </p>
+
+      </div>
+
+    </div>
+
+    <div class="bg-white rounded-xl shadow-card p-6">
+
+      <div class="overflow-x-auto">
+
+        <table class="w-full">
+
+          <thead>
+
+            <tr class="border-b">
+
+              <th class="text-left py-3">
+                ID
+              </th>
+
+              <th class="text-left py-3">
+                Pelanggan
+              </th>
+
+              <th class="text-left py-3">
+                Tanggal
+              </th>
+
+              <th class="text-left py-3">
+                Total
+              </th>
+
+              <th class="text-left py-3">
+                Status
+              </th>
+
+              <th class="text-left py-3">
+                Aksi
+              </th>
+
+            </tr>
+
+          </thead>
+
+          <tbody id="orders-table">
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </main>
+
+</div>
+
+<!-- Modal Detail -->
+
+<div
+  id="detail-modal"
+  class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+
+  <div class="bg-white rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+
+    <div class="flex justify-between items-center mb-4">
+
+      <h2 class="text-2xl font-bold">
+        Detail Pesanan
+      </h2>
+
+      <button
+        onclick="closeModal()"
+        class="bg-red-600 text-white px-3 py-2 rounded">
+
+        Tutup
+
+      </button>
+
+    </div>
+
+    <div id="order-detail">
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+function rupiah(number){
+
+  return new Intl.NumberFormat(
+    "id-ID",
+    {
+      style:"currency",
+      currency:"IDR"
+    }
+  ).format(number);
+
+}
+
+let orders =
+  JSON.parse(
+    localStorage.getItem("orders")
+  ) || [];
+
+function renderOrders(){
+
+  const table =
+    document.getElementById(
+      "orders-table"
+    );
+
+  table.innerHTML = "";
+
+  if(orders.length === 0){
+
+    table.innerHTML = `
+      <tr>
+        <td colspan="6" class="py-6 text-center text-gray-500">
+          Belum ada pesanan
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+  orders
+    .slice()
+    .reverse()
+    .forEach(order => {
+
+      table.innerHTML += `
+        <tr class="border-b">
+
+          <td class="py-3">
+            ${order.id}
+          </td>
+
+          <td class="py-3">
+            ${order.nama}
+          </td>
+
+          <td class="py-3">
+            ${order.tanggal}
+          </td>
+
+          <td class="py-3">
+            ${rupiah(order.total)}
+          </td>
+
+          <td class="py-3">
+
+            <select
+              onchange="updateStatus('${order.id}', this.value)"
+              class="border rounded px-2 py-1">
+
+              <option ${order.status==="Pending"?"selected":""}>
+                Pending
+              </option>
+
+              <option ${order.status==="Dibayar"?"selected":""}>
+                Dibayar
+              </option>
+
+              <option ${order.status==="Diproses"?"selected":""}>
+                Diproses
+              </option>
+
+              <option ${order.status==="Dikirim"?"selected":""}>
+                Dikirim
+              </option>
+
+              <option ${order.status==="Selesai"?"selected":""}>
+                Selesai
+              </option>
+
+              <option ${order.status==="Dibatalkan"?"selected":""}>
+                Dibatalkan
+              </option>
+
+            </select>
+
+          </td>
+
+          <td class="py-3">
+
+            <button
+              onclick="showDetail('${order.id}')"
+              class="bg-blue-600 text-white px-3 py-1 rounded">
+
+              Detail
+
+            </button>
+
+            <button
+              onclick="printInvoice('${order.id}')"
+              class="bg-green-600 text-white px-3 py-1 rounded ml-1">
+
+              Invoice
+
+            </button>
+
+            <button
+              onclick="deleteOrder('${order.id}')"
+              class="bg-red-600 text-white px-3 py-1 rounded ml-1">
+
+              Hapus
+
+            </button>
+
+          </td>
+
+        </tr>
+      `;
+
+    });
+
+}
+
+function updateStatus(id,status){
+
+  orders =
+    orders.map(order => {
+
+      if(order.id === id){
+        order.status = status;
+      }
+
+      return order;
+
+    });
+
+  localStorage.setItem(
+    "orders",
+    JSON.stringify(orders)
+  );
+
+}
+
+function deleteOrder(id){
+
+  if(
+    !confirm(
+      "Hapus pesanan ini?"
+    )
+  ){
+    return;
+  }
+
+  orders =
+    orders.filter(
+      order => order.id !== id
+    );
+
+  localStorage.setItem(
+    "orders",
+    JSON.stringify(orders)
+  );
+
+  renderOrders();
+
+}
+
+function showDetail(id){
+
+  const order =
+    orders.find(
+      item => item.id === id
+    );
+
+  if(!order) return;
+
+  let itemsHtml = "";
+
+  order.items.forEach(item => {
+
+    itemsHtml += `
+      <li>
+        ${item.nama}
+        (${item.qty}x)
+      </li>
+    `;
+
+  });
+
+  document.getElementById(
+    "order-detail"
+  ).innerHTML = `
+
+    <p><strong>ID:</strong> ${order.id}</p>
+
+    <p><strong>Nama:</strong> ${order.nama}</p>
+
+    <p><strong>WhatsApp:</strong> ${order.wa}</p>
+
+    <p><strong>Email:</strong> ${order.email || "-"}</p>
+
+    <p><strong>Alamat:</strong> ${order.alamat}</p>
+
+    <p><strong>Pengiriman:</strong> ${order.pengiriman}</p>
+
+    <p><strong>Pembayaran:</strong> ${order.pembayaran}</p>
+
+    <p><strong>Status:</strong> ${order.status}</p>
+
+    <hr class="my-4">
+
+    <h3 class="font-bold mb-2">
+      Produk
+    </h3>
+
+    <ul class="list-disc ml-5">
+      ${itemsHtml}
+    </ul>
+
+    <hr class="my-4">
+
+    <p class="font-bold text-xl">
+      Total:
+      ${rupiah(order.total)}
+    </p>
+
+  `;
+
+  document
+    .getElementById("detail-modal")
+    .classList.remove("hidden");
+
+}
+
+function closeModal(){
+
+  document
+    .getElementById("detail-modal")
+    .classList.add("hidden");
+
+}
+
+function printInvoice(id){
+
+  const order =
+    orders.find(
+      item => item.id === id
+    );
+
+  if(!order) return;
+
+  let invoice = `
+INVOICE KRIUK BARENG
+
+ID:
+${order.id}
+
+Nama:
+${order.nama}
+
+Tanggal:
+${order.tanggal}
+
+----------------------
+
+`;
+
+  order.items.forEach(item => {
+
+    invoice += `
+${item.nama}
+${item.qty}x
+`;
+
+  });
+
+  invoice += `
+
+----------------------
+
+TOTAL:
+${rupiah(order.total)}
+
+STATUS:
+${order.status}
+`;
+
+  const win =
+    window.open(
+      "",
+      "_blank"
+    );
+
+  win.document.write(`
+    <pre>${invoice}</pre>
+  `);
+
+  win.print();
+
+}
+
+renderOrders();
+
+</script>
+
+</body>
+</html>
