@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Daftar - Kriuk Bareng</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+
+<body class="bg-gray-100 min-h-screen">
+
+  <!-- Navbar -->
+  <nav class="bg-red-600 text-white shadow-lg">
+
+    <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+
+      <h1 class="text-2xl font-bold">
+        Kriuk Bareng
+      </h1>
+
+      <div class="space-x-4">
+        <a href="index.html">Beranda</a>
+        <a href="produk.html">Produk</a>
+        <a href="login.html">Login</a>
+      </div>
+
+    </div>
+
+  </nav>
+
+  <!-- Register -->
+  <div class="flex justify-center items-center py-12 px-4">
+
+    <div class="bg-white shadow-card rounded-xl p-8 w-full max-w-md">
+
+      <div class="text-center mb-8">
+
+        <h2 class="text-3xl font-bold text-red-600">
+          Daftar Akun
+        </h2>
+
+        <p class="text-gray-500 mt-2">
+          Buat akun baru Kriuk Bareng
+        </p>
+
+      </div>
+
+      <form id="register-form">
+
+        <div class="mb-4">
+
+          <label class="block mb-2">
+            Nama Lengkap
+          </label>
+
+          <input
+            type="text"
+            id="nama"
+            class="form-input"
+            required>
+
+        </div>
+
+        <div class="mb-4">
+
+          <label class="block mb-2">
+            Email
+          </label>
+
+          <input
+            type="email"
+            id="email"
+            class="form-input"
+            required>
+
+        </div>
+
+        <div class="mb-4">
+
+          <label class="block mb-2">
+            Password
+          </label>
+
+          <input
+            type="password"
+            id="password"
+            class="form-input"
+            required>
+
+        </div>
+
+        <div class="mb-6">
+
+          <label class="block mb-2">
+            Konfirmasi Password
+          </label>
+
+          <input
+            type="password"
+            id="confirmPassword"
+            class="form-input"
+            required>
+
+        </div>
+
+        <button
+          type="submit"
+          class="w-full bg-red-600 text-white py-3 rounded-lg hover:bg-red-700">
+
+          Daftar Sekarang
+
+        </button>
+
+      </form>
+
+      <div class="text-center mt-6">
+
+        <p class="text-gray-600">
+
+          Sudah punya akun?
+
+          <a
+            href="login.html"
+            class="text-red-600 font-bold">
+
+            Login
+
+          </a>
+
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+
+    document
+      .getElementById("register-form")
+      .addEventListener("submit", function(e){
+
+        e.preventDefault();
+
+        const nama =
+          document.getElementById("nama").value;
+
+        const email =
+          document.getElementById("email").value;
+
+        const password =
+          document.getElementById("password").value;
+
+        const confirmPassword =
+          document.getElementById("confirmPassword").value;
+
+        if(password !== confirmPassword){
+
+          alert(
+            "Konfirmasi password tidak cocok"
+          );
+
+          return;
+        }
+
+        let users =
+          JSON.parse(
+            localStorage.getItem("users")
+          ) || [];
+
+        const exists =
+          users.find(
+            user => user.email === email
+          );
+
+        if(exists){
+
+          alert(
+            "Email sudah terdaftar"
+          );
+
+          return;
+        }
+
+        users.push({
+          id: Date.now(),
+          nama,
+          email,
+          password,
+          role: "customer",
+          createdAt:
+            new Date().toISOString()
+        });
+
+        localStorage.setItem(
+          "users",
+          JSON.stringify(users)
+        );
+
+        alert(
+          "Registrasi berhasil. Silakan login."
+        );
+
+        window.location.href =
+          "login.html";
+
+      });
+
+  </script>
+
+</body>
+
+</html>
