@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Admin Produk - Kriuk Bareng</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+
+<body class="bg-gray-100">
+
+<div class="flex">
+
+  <!-- Sidebar -->
+  <aside class="admin-sidebar w-64">
+
+    <div class="p-6">
+      <h2 class="text-2xl font-bold">Kriuk Bareng</h2>
+      <p class="text-gray-400 text-sm">Admin Panel</p>
+    </div>
+
+    <nav>
+      <a href="index.html">📊 Dashboard</a>
+      <a href="produk.html">📦 Produk</a>
+      <a href="pesanan.html">🛒 Pesanan</a>
+      <a href="../index.html">🌐 Lihat Website</a>
+    </nav>
+
+  </aside>
+
+  <!-- Content -->
+  <main class="flex-1 p-6">
+
+    <div class="flex justify-between items-center mb-6">
+
+      <div>
+        <h1 class="text-3xl font-bold">
+          Kelola Produk
+        </h1>
+
+        <p class="text-gray-500">
+          Tambah, edit dan hapus produk
+        </p>
+      </div>
+
+      <button
+        onclick="openModal()"
+        class="bg-red-600 text-white px-4 py-2 rounded-lg">
+
+        + Tambah Produk
+
+      </button>
+
+    </div>
+
+    <div class="bg-white rounded-xl shadow-card p-6">
+
+      <div class="overflow-x-auto">
+
+        <table class="w-full">
+
+          <thead>
+
+            <tr class="border-b">
+
+              <th class="text-left py-3">Nama</th>
+              <th class="text-left py-3">Kategori</th>
+              <th class="text-left py-3">Harga</th>
+              <th class="text-left py-3">Stok</th>
+              <th class="text-left py-3">Aksi</th>
+
+            </tr>
+
+          </thead>
+
+          <tbody id="product-table">
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </main>
+
+</div>
+
+<!-- Modal -->
+
+<div
+  id="product-modal"
+  class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+
+  <div class="bg-white rounded-xl p-6 w-full max-w-lg">
+
+    <h2 class="text-2xl font-bold mb-4">
+      Produk
+    </h2>
+
+    <input
+      type="hidden"
+      id="product-id">
+
+    <div class="mb-3">
+
+      <label>Nama Produk</label>
+
+      <input
+        type="text"
+        id="product-name"
+        class="form-input mt-2">
+
+    </div>
+
+    <div class="mb-3">
+
+      <label>Kategori</label>
+
+      <input
+        type="text"
+        id="product-category"
+        class="form-input mt-2">
+
+    </div>
+
+    <div class="mb-3">
+
+      <label>Harga</label>
+
+      <input
+        type="number"
+        id="product-price"
+        class="form-input mt-2">
+
+    </div>
+
+    <div class="mb-3">
+
+      <label>Stok</label>
+
+      <input
+        type="number"
+        id="product-stock"
+        class="form-input mt-2">
+
+    </div>
+
+    <div class="mb-3">
+
+      <label>URL Gambar</label>
+
+      <input
+        type="text"
+        id="product-image"
+        class="form-input mt-2">
+
+    </div>
+
+    <div class="mb-4">
+
+      <label>Deskripsi</label>
+
+      <textarea
+        id="product-description"
+        rows="3"
+        class="form-input mt-2"></textarea>
+
+    </div>
+
+    <div class="flex gap-3">
+
+      <button
+        onclick="saveProduct()"
+        class="flex-1 bg-red-600 text-white py-3 rounded-lg">
+
+        Simpan
+
+      </button>
+
+      <button
+        onclick="closeModal()"
+        class="flex-1 bg-gray-800 text-white py-3 rounded-lg">
+
+        Batal
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script src="../assets/js/products.js"></script>
+
+<script>
+
+let productList =
+  JSON.parse(
+    localStorage.getItem("kb_products")
+  ) || [...products];
+
+function saveProductsToStorage() {
+
+  localStorage.setItem(
+    "kb_products",
+    JSON.stringify(productList)
+  );
+
+}
+
+function renderProducts() {
+
+  const table =
+    document.getElementById(
+      "product-table"
+    );
+
+  table.innerHTML = "";
+
+  productList.forEach(product => {
+
+    table.innerHTML += `
+      <tr class="border-b">
+
+        <td class="py-3">
+          ${product.nama}
+        </td>
+
+        <td class="py-3">
+          ${product.kategori}
+        </td>
+
+        <td class="py-3">
+          Rp ${product.harga.toLocaleString()}
+        </td>
+
+        <td class="py-3">
+          ${product.stok}
+        </td>
+
+        <td class="py-3">
+
+          <button
+            onclick="editProduct(${product.id})"
+            class="bg-yellow-400 px-3 py-1 rounded">
+
+            Edit
+
+          </button>
+
+          <button
+            onclick="deleteProduct(${product.id})"
+            class="bg-red-600 text-white px-3 py-1 rounded ml-2">
+
+            Hapus
+
+          </button>
+
+        </td>
+
+      </tr>
+    `;
+
+  });
+
+}
+
+function openModal() {
+
+  document
+    .getElementById("product-modal")
+    .classList.remove("hidden");
+
+}
+
+function closeModal() {
+
+  document
+    .getElementById("product-modal")
+    .classList.add("hidden");
+
+  clearForm();
+
+}
+
+function clearForm() {
+
+  document.getElementById("product-id").value = "";
+  document.getElementById("product-name").value = "";
+  document.getElementById("product-category").value = "";
+  document.getElementById("product-price").value = "";
+  document.getElementById("product-stock").value = "";
+  document.getElementById("product-image").value = "";
+  document.getElementById("product-description").value = "";
+
+}
+
+function saveProduct() {
+
+  const id =
+    document.getElementById("product-id").value;
+
+  const data = {
+
+    id: id ? Number(id) : Date.now(),
+
+    nama:
+      document.getElementById(
+        "product-name"
+      ).value,
+
+    kategori:
+      document.getElementById(
+        "product-category"
+      ).value,
+
+    harga:
+      Number(
+        document.getElementById(
+          "product-price"
+        ).value
+      ),
+
+    stok:
+      Number(
+        document.getElementById(
+          "product-stock"
+        ).value
+      ),
+
+    gambar:
+      document.getElementById(
+        "product-image"
+      ).value,
+
+    deskripsi:
+      document.getElementById(
+        "product-description"
+      ).value
+
+  };
+
+  if(id){
+
+    productList =
+      productList.map(product =>
+        product.id === Number(id)
+        ? data
+        : product
+      );
+
+  } else {
+
+    productList.push(data);
+
+  }
+
+  saveProductsToStorage();
+  renderProducts();
+  closeModal();
+
+}
+
+function editProduct(id) {
+
+  const product =
+    productList.find(
+      item => item.id === id
+    );
+
+  if(!product) return;
+
+  openModal();
+
+  document.getElementById("product-id").value =
+    product.id;
+
+  document.getElementById("product-name").value =
+    product.nama;
+
+  document.getElementById("product-category").value =
+    product.kategori;
+
+  document.getElementById("product-price").value =
+    product.harga;
+
+  document.getElementById("product-stock").value =
+    product.stok;
+
+  document.getElementById("product-image").value =
+    product.gambar;
+
+  document.getElementById("product-description").value =
+    product.deskripsi;
+
+}
+
+function deleteProduct(id) {
+
+  if(!confirm("Hapus produk ini?")) return;
+
+  productList =
+    productList.filter(
+      product => product.id !== id
+    );
+
+  saveProductsToStorage();
+  renderProducts();
+
+}
+
+renderProducts();
+
+</script>
+
+</body>
+        </html>
